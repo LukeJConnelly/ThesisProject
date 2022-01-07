@@ -1,0 +1,49 @@
+{
+	"threshold": 0.65,
+	"initial": 0.1,
+	"users": {
+		"insight_centre": 0.9,
+		"vistamilk": 0.7,
+		"scienceirel": 0.8, 
+		"dcu": 0.3,
+		"nuigalway": 0.3,
+		"ucc" : 0.3,
+		"ucddublin": 0.3,
+		"siliconrepublic": 0.4,
+		"rtebrainstorm": 0.4,
+		"rte" : 0.2,
+		"irishtimes": 0.2
+    },
+	"hashtags": {
+		"epe": 0.9,
+		"publicengagement" : 0.8,
+		"stem": 0.3,
+		"steam": 0.4,
+		"openaccess": 0.5,
+		"openscience":0.5,
+		"jobfairy": -0.9,
+		"vacancy": -0.7,
+		"fellowship": -0.5,
+		"job": -0.5,
+		"phd": -0.2
+	},
+	"words": {
+		"talk": 0.1,
+		"speech": 0.1,
+		"podcast": 0.2,
+		"workshop" : 0.2,
+		"hackathon": 0.2,
+		"masterclass": 0.2,
+		"steam": 0.1,
+		"epe": 0.9,
+		"vacancy": -0.5,
+		"job opportunity": -0.9,
+		"job opportunities": -0.9,
+		"join us": -0.2,
+		"award": -0.4,
+		"fellowship": -0.6,
+		"apply now": -0.4,
+		"phd": -0.1,
+		"position": -0.1
+	}
+}
