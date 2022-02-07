@@ -1,9 +1,17 @@
 # API keys and usernames
 env.json
 
-# Tweets
-found_tweets.json
-test_tweets.json
+# Running details and collected events
+*.json
+
+# Websites
+www*/
+
+# CSV outputs
+csv_outputs/
+
+# PyCharm
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
