@@ -31,14 +31,12 @@ print(str(len(collected_articles)) + " silicon republic articles found")
 
 # Check if previous running is still before end date
 try:
-    output_file = open("found_silicon_republic.json")
+    output_file = open("found/found_silicon_republic.json")
     previous_articles = json.load(output_file)
     if datetime.datetime.strptime(previous_articles[-1]["datetime"], "%Y-%m-%d %H:%M:%S%z") > end_date:
         for previous_article in previous_articles:
             collected_articles.append(previous_article)
 except: pass
 
-output_file = open("found_silicon_republic.json", 'w')
+output_file = open("found/found_silicon_republic.json", 'w')
 json.dump(collected_articles, output_file)
-
-quit()

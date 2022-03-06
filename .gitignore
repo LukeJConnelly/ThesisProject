@@ -4,8 +4,9 @@ env.json
 # Running details and collected events
 *.json
 
-# Websites
+# Websites / Results
 www*/
+google_downloads/
 
 # CSV outputs
 csv_outputs/
@@ -60,3 +61,6 @@ coverage.xml
 # Django stuff:
 *.log
 *.pot
+
+# Jupyter Notebooks
+.ipynb_checkpoints

@@ -42,7 +42,5 @@ for ep in insight_podcast["episodes"]["items"]:
                            "datetime": str(release_date)})
 
 print(str(len(found_episodes)) + " podcast episodes found")
-output_file = open("found_podcast.json", 'w')
+output_file = open("found/found_podcast.json", 'w')
 json.dump(found_episodes, output_file)
-
-quit()

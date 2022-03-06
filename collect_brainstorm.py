@@ -27,7 +27,7 @@ while curr_year >= env_vars["end_date"]["year"]:
     curr_year -= 1  
 
 # Filter files by regex /<year>/<4 digit ID>/<article>/index.html
-r = re.compile(".\/www.rte.ie\/brainstorm\/20[0-9]{2}\/[0-9]{4}\/.*\/index.html")
+r = re.compile(r".(?:\\|/)www.rte.ie(?:\\|/)brainstorm(?:\\|/)20[0-9]{2}(?:\\|/)[0-9]{4}(?:\\|/).*(?:\\|/)index.html")
 files = list(filter(r.match, files))
 
 collected_articles = []
@@ -49,7 +49,5 @@ for f in files:
         "datetime": str(article.publish_date)})
     
 print(str(len(collected_articles)) + " brainstorm articles found")
-output_file = open("found_brainstorm.json", 'w')
+output_file = open("found/found_brainstorm.json", 'w')
 json.dump(collected_articles, output_file)
-
-quit()
