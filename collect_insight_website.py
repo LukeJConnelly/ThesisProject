@@ -1,4 +1,4 @@
-# Assumes running of wget https://www.insight-centre.org/news/ -r -E -p --no-parent
+# Assumes running of wget https://www.insight-centre.org/news/ -r -E -p
 
 from newspaper import Article
 import datetime
@@ -35,7 +35,7 @@ for f in files:
     collected_articles.append({
         "title": article.title,
         "text": article.text,
-        "link": f[2:],
+        "link": f[2:-10],
         "datetime": str(article.publish_date)
     })
     

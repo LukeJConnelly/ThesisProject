@@ -33,10 +33,10 @@ class Tweet:
             "datetime": str(self.datetime),
             "original_text": self.cleaned_text,
             "cleaned_text": self.cleaned_text,
-            "author": self.author,
-            "entities": self.entities,
+            "author": dict(self.author),
+            "entities": dict(self.entities),
             "retweet": self.retweet,
-            "retweet_author": self.retweet_author,
+            "retweet_author": dict(self.retweet_author),
             "quote": self.quote,
             "quoted_text": self.quoted_text
         }

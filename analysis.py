@@ -1,4 +1,6 @@
 import json
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
 
 
 def get_probability(x, y):
@@ -73,12 +75,13 @@ output = {"status": {},
           "brainstorm": [],
           "silicon_republic": [],
           "podcast": [],
+          "google": [],
           "found_epe": {},
           "unknown_epe": []}
 
 people_file = open('env.json')
 people = json.load(people_file)["people"]
-tweets_working = insight_website_working = brainstorm_working = silicon_republic_working = podcast_working = True
+tweets_working = insight_website_working = brainstorm_working = silicon_republic_working = podcast_working = google_working = True
 
 try:
     # Tweets found by collect_tweets.py
@@ -89,21 +92,37 @@ try:
     tweets_probability_users_dict = tweets_probability_weights["users"]
     tweets_probability_hashtags_dict = tweets_probability_weights["hashtags"]
     tweets_probability_words_dict = tweets_probability_weights["words"]
+    ps = PorterStemmer()
     for user in found_tweets:
         tweet_list = found_tweets[user]
         for tweet in tweet_list:
             probability = tweets_probability_weights["initial"]
+            features = []
             for user_mention in tweet["entities"]["user_mentions"]:
                 if user_mention["screen_name"].lower() in tweets_probability_users_dict:
-                    probability = get_probability(probability,
-                                                  tweets_probability_users_dict[user_mention["screen_name"].lower()])
+                    features.append(("Mentions: " + user_mention["screen_name"].lower(),
+                                     tweets_probability_users_dict[user_mention["screen_name"].lower()]))
+                    if tweets_probability_users_dict[user_mention["screen_name"].lower()] > 0:
+                        probability = get_probability(probability, tweets_probability_users_dict[user_mention["screen_name"].lower()])
+                    else:
+                        probability = 1 - get_probability(1 - probability, abs(tweets_probability_users_dict[user_mention["screen_name"].lower()]))
             for hashtag in tweet["entities"]["hashtags"]:
                 if hashtag["text"].lower() in tweets_probability_hashtags_dict:
-                    probability = get_probability(probability,
-                                                  tweets_probability_hashtags_dict[hashtag["text"].lower()])
-            for word in tweets_probability_words_dict:
-                if word in tweet["cleaned_text"]:
-                    probability = get_probability(probability, tweets_probability_words_dict[word.lower()])
+                    features.append(("Hashtag: " + hashtag["text"].lower(),
+                                     tweets_probability_hashtags_dict[hashtag["text"].lower()]))
+                    if tweets_probability_hashtags_dict[hashtag["text"].lower()] > 0:
+                        probability = get_probability(probability, tweets_probability_hashtags_dict[hashtag["text"].lower()])
+                    else:
+                        probability = 1 - get_probability(1 - probability, abs(tweets_probability_hashtags_dict[hashtag["text"].lower()]))
+            word_tokens = word_tokenize(tweet["cleaned_text"])
+            stems = [ps.stem(w) for w in word_tokens]
+            for term in tweets_probability_words_dict:
+                if all(x.lower() in stems for x in term.split(' ')):
+                    features.append(("Uses: " + term, tweets_probability_words_dict[term.lower()]))
+                    if tweets_probability_words_dict[term.lower()] > 0:
+                        probability = get_probability(probability, tweets_probability_words_dict[term.lower()])
+                    else:
+                        probability = 1 - get_probability(1 - probability, abs(tweets_probability_words_dict[term.lower()]))
             is_epe = probability > tweets_probability_weights["threshold"]
             # Output
             people_involved = []
@@ -147,7 +166,7 @@ try:
             for person in people:
                 if person.lower() in (article["title"] + article["text"]).lower():
                     people_involved.append(person)
-        outputfn(people_involved, "insight_website", article["title"], article["link"], is_epe, output)
+        outputfn(people_involved, "insight_website", article["title"]+" Link: "+article["link"], article["link"], is_epe, output)
 except:
     insight_website_working = False
 
@@ -164,7 +183,7 @@ except:
     silicon_republic_working = False
 
 try:
-    # Articles found by collect_silicon_republic.py
+    # Articles found by collect_podcast.py
     found_podcast = json.load(open('found_podcast.json'))
     for episode in found_podcast:
         probability = 0
@@ -178,13 +197,39 @@ try:
 except:
     podcast_working = False
 
+try:
+    # Articles found by collect_google.py
+    found_google = json.load(open('found_google.json'))
+    # Load probabilites associated with features
+    google_probability_weights_file = open('probability_weights_google.json')
+    google_probability_weights = json.load(google_probability_weights_file)
+    google_probability_words_dict = google_probability_weights["words"]
+    for person_searched in found_google:
+        results = found_google[person_searched]
+        for result in results:
+            probability = google_probability_weights["initial"]
+            for word in google_probability_words_dict:
+                if word.lower() in result["text"].lower():
+                    probability = get_probability(probability, google_probability_words_dict[word])
+            is_epe = probability > google_probability_weights["threshold"]
+            people_involved = []
+            if is_epe:
+                for person in people:
+                    if person.lower() in result["text"].lower():
+                        people_involved.append(person)
+            # Output
+            outputfn(people_involved, "google", result["link"], result["link"], is_epe, output)
+except:
+    google_working = False
+
 # Export any exceptions thrown
 output["status"] = {
     "tweets": tweets_working,
     "insight_website": insight_website_working,
     "brainstorm": brainstorm_working,
     "silicon_republic": silicon_republic_working,
-    "podcast": podcast_working
+    "podcast": podcast_working,
+    "google": google_working
 }
 print(output["status"])
 
