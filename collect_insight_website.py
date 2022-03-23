@@ -18,7 +18,7 @@ end_date = datetime.datetime(
 # All files matching insight-centre/<article>/index.html
 pathname = "./www.insight-centre.org/**/index.html"
 files = glob.glob(pathname)
-r = re.compile("./www.insight-centre.org/*[a-z0-9-]{9,}/index.html")
+r = re.compile(r".(?:\\|/)www.insight-centre.org(?:\\|/)*[a-z0-9-]{9,}(?:\\|/)index.html")
 files = list(filter(r.match, files))
 
 collected_articles = []
@@ -40,7 +40,5 @@ for f in files:
     })
     
 print(str(len(collected_articles)) + " insight website articles found")
-output_file = open("found_insight_website.json", 'w')
+output_file = open("found/found_insight_website.json", 'w')
 json.dump(collected_articles, output_file)
-
-quit()

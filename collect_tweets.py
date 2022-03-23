@@ -50,10 +50,8 @@ for user in users:
         print("Issue for " + user)
 
 print(str(num_tweets_found) + " tweets found")
-output_file = open("found_tweets.json", 'w')
+output_file = open("found/found_tweets.json", 'w')
 json.dump(collected_tweets, output_file)
-
-quit()
 
 # IMPORTANT INFO ON RATE LIMIT:
 # Every 20 tweets is a call, we have 900 calls per 15 minutes, 100,000 per day, 3200 per timeline max
