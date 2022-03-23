@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import magicdate
 import re
 import locationtagger
+import traceback
 
 similarity_thresholds = {
     ("article", "article"): 0.99,
@@ -227,7 +228,8 @@ try:
                      output,
                      tweet["cleaned_text"],
                      details={"date": date, "location": location, "audience": audience})
-except:
+except Exception:
+    print("Tweets currently down with trace: ", traceback.format_exc())
     tweets_working = False
 
 try:
@@ -266,19 +268,22 @@ try:
         outputfn(people_involved, "insight_website", article["title"] + " Link: " + article["link"], article["link"],
                  is_epe, output, article["title"] + ": " + article["text"],
                  details={"date": date, "location": location, "audience": audience})
-except:
+except Exception:
+    print("Insight Website currently down with trace: ", traceback.format_exc())
     insight_website_working = False
 
 try:
     # Articles found by collect_brainstorm.py
     generic_article_analysis(people, "brainstorm", output)
-except:
+except Exception:
+    print("Brainstorm currently down with trace: ", traceback.format_exc())
     brainstorm_working = False
 
 try:
     # Articles found by collect_silicon_republic.py
     generic_article_analysis(people, "silicon_republic", output)
-except:
+except Exception:
+    print("Silicon Republic currently down with trace: ", traceback.format_exc())
     silicon_republic_working = False
 
 try:
@@ -295,7 +300,8 @@ try:
         outputfn(people_involved, "podcast", episode["name"], episode["link"],
                  probability > 0, output, episode["name"] + ": " + episode["description"],
                  details={"date": episode["datetime"], "location": "online", "audience": audience_estimate["podcast"]})
-except:
+except Exception:
+    print("Podcast currently down with trace: ", traceback.format_exc())
     podcast_working = False
 
 # try:
@@ -320,7 +326,8 @@ except:
 #                         people_involved.append(person)
 #             # Output
 #             outputfn(people_involved, "google", result["link"], result["link"], is_epe, output)
-# except:
+# except Exception:
+#     print("Google currently down with trace: ", traceback.format_exc())
 #     google_working = False
 
 # Export any exceptions thrown
