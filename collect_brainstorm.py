@@ -9,18 +9,23 @@ import re
 env_file = open("env.json", 'r')
 env_vars = json.load(env_file)
 
+start_date = datetime.datetime(
+    env_vars["start_date"]["year"],
+    env_vars["start_date"]["month"],
+    env_vars["start_date"]["day"],
+    0, 0, 0).replace(tzinfo=datetime.timezone.utc) - datetime.timedelta(days=1)
+
 end_date = datetime.datetime(
     env_vars["end_date"]["year"], 
     env_vars["end_date"]["month"],
     env_vars["end_date"]["day"], 
     0, 0, 0).replace(tzinfo=datetime.timezone.utc)
 
-curr_year = datetime.datetime.now().year
+curr_year = env_vars["end_date"]["year"]
 files = []
-
 # Brainstorm stores articles as brainstorm/YEAR/article
 # Loop through all years included in current search period
-while curr_year >= env_vars["end_date"]["year"]:
+while curr_year >= env_vars["start_date"]["year"]:
     directory = "./www.rte.ie/brainstorm/" + str(curr_year)+"/"
     pathname = directory + "/**/**/index.html"
     files.extend(glob.glob(pathname))
@@ -40,7 +45,7 @@ for f in files:
     article.set_html(html)
     article.parse()
     if article.text == "": continue
-    if article.publish_date == None or article.publish_date < end_date: continue
+    if article.publish_date is None or article.publish_date < start_date or article.publish_date > end_date: continue
     collected_articles.append({
         "title": article.title,
         "text": article.text,
@@ -49,5 +54,5 @@ for f in files:
         "datetime": str(article.publish_date)})
     
 print(str(len(collected_articles)) + " brainstorm articles found")
-output_file = open("found/found_brainstorm.json", 'w')
-json.dump(collected_articles, output_file)
+with open("found/found_brainstorm.json", 'w') as output_file:
+    json.dump(collected_articles, output_file)

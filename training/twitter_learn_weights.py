@@ -67,7 +67,7 @@ def get_feature_list(model, vectorizer):
     return weighted_features
 
 
-def get_feature_weights(training_data, bound, ngram=1):
+def get_feature_weights(training_data, bound, minimum_probability, ngram=1):
     vectorizer = TfidfVectorizer(stop_words='english', lowercase=True, ngram_range=(1, ngram))
     metric_to_result = run_experiment(training_data, vectorizer)
     result = metric_to_result['fscore']
@@ -80,14 +80,16 @@ def get_feature_weights(training_data, bound, ngram=1):
     feature_weights = {}
     for f in feature_list:
         feature_weights[f[0]] = round(scalar * f[1], 2)
-    return feature_weights
+    return {k: v for k, v in feature_weights.items() if abs(v) > minimum_probability}
 
 
 random.seed(42)
 
-ngram = int(sys.argv[-3]) if sys.argv[:-1] else 3
-bound = float(sys.argv[-2]) if sys.argv[:-1] else 0.95
-word_bound = float(sys.argv[-1]) if sys.argv[:-1] else 0.6
+ngram = int(sys.argv[-5]) if sys.argv[:-1] else 3
+bound = float(sys.argv[-4]) if sys.argv[:-1] else 0.95
+word_bound = float(sys.argv[-3]) if sys.argv[:-1] else 0.99
+min_prob = float(sys.argv[-2]) if sys.argv[:-1] else 0.05
+min_word_prob = float(sys.argv[-1]) if sys.argv[:-1] else 0.05
 
 training_data = json.load(open("twitter_training_data.json", 'r'))
 is_epe = training_data["is_epe"]
@@ -112,10 +114,10 @@ for user in found_tweets:
             if hashtags: hashtag_training_data.append({'Text': hashtags, 'Label': is_epe[tweet_index]})
             if user_mentions: user_mention_training_data.append({'Text': user_mentions, 'Label': is_epe[tweet_index]})
 
-word_final = get_feature_weights(word_training_data, word_bound, ngram=ngram)
+word_final = get_feature_weights(word_training_data, word_bound, min_word_prob, ngram=ngram)
 # No need for ngrams as all hashtags and usernames are one word only
-hashtag_final = get_feature_weights(hashtag_training_data, bound)
-user_mention_final = get_feature_weights(user_mention_training_data, bound)
+hashtag_final = get_feature_weights(hashtag_training_data, min_prob, bound)
+user_mention_final = get_feature_weights(user_mention_training_data, min_prob, bound)
 
 # ADAPTED FROM ANALYSIS.PY
 # Collect features across all tweets

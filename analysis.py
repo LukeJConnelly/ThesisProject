@@ -209,7 +209,7 @@ try:
                 if not tweet["retweet"] and user not in pages:
                     people_involved.append(user)
                 for person in people:
-                    if person in tweet["cleaned_text"] and not person == user:
+                    if person in tweet["cleaned_text"]:
                         people_involved.append(person)
                 if not people_involved and tweet["retweet_author"] in [p["twitter"] for p in people.values()]:
                     people_involved.append(tweet["retweet_author"])
@@ -390,5 +390,8 @@ def check_duplicates(output):
 
 slim_output = check_duplicates(output)
 
-output_file = open("output.json", 'w')
-json.dump(slim_output, output_file)
+with open("output.json", 'w') as output_file:
+    json.dump(slim_output, output_file)
+
+with open("EPE_"+datetime.now().strftime("%H:%M_%D")+".json", 'w') as output_file:
+    json.dump(slim_output, output_file)
