@@ -17,6 +17,11 @@ try:
 except:
     print("Issue with Spotify API authentication")
 
+start_date = datetime.datetime(
+    env_vars["start_date"]["year"],
+    env_vars["start_date"]["month"],
+    env_vars["start_date"]["day"],
+    0, 0, 0) - datetime.timedelta(days=1)
 end_date = datetime.datetime(
     env_vars["end_date"]["year"],
     env_vars["end_date"]["month"],
@@ -35,12 +40,12 @@ for ep in insight_podcast["episodes"]["items"]:
                                      int(ymd[1]),
                                      int(ymd[2]),
                                      0, 0, 0)
-    if release_date < end_date: continue
+    if release_date < start_date or release_date > end_date: continue
     found_episodes.append({"name": ep["name"],
                            "description": ep["description"],
                            "link": ep["external_urls"]["spotify"],
                            "datetime": str(release_date)})
 
 print(str(len(found_episodes)) + " podcast episodes found")
-output_file = open("found/found_podcast.json", 'w')
-json.dump(found_episodes, output_file)
+with open("found/found_podcast.json", 'w+') as output_file:
+    json.dump(found_episodes, output_file)

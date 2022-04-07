@@ -31,6 +31,11 @@ end_date = datetime.datetime(
     env_vars["end_date"]["month"],
     env_vars["end_date"]["day"],
     0, 0, 0)
+start_date = datetime.datetime(
+    env_vars["start_date"]["year"],
+    env_vars["start_date"]["month"],
+    env_vars["start_date"]["day"],
+    0, 0, 0) - datetime.timedelta(days=1)
 collected_tweets = {}
 num_tweets_found = 0
 
@@ -42,16 +47,17 @@ for user in users:
         for status in tweepy.Cursor(api.user_timeline, screen_name='@' + account,
                                     tweet_mode="extended").items():
             curr_tweet = Tweet(status._json, name_dictionary=name_dict)
+            if curr_tweet.datetime > end_date: continue
+            if curr_tweet.datetime < start_date: break
             collected_tweets[user].append(curr_tweet.jsonable())
             num_tweets_found += 1
-            if curr_tweet.datetime < end_date: break
     except Exception as e:
         print(e)
         print("Issue for " + user)
 
 print(str(num_tweets_found) + " tweets found")
-output_file = open("found/found_tweets.json", 'w')
-json.dump(collected_tweets, output_file)
+with open("found/found_tweets.json", 'w+') as output_file:
+    json.dump(collected_tweets, output_file)
 
 # IMPORTANT INFO ON RATE LIMIT:
 # Every 20 tweets is a call, we have 900 calls per 15 minutes, 100,000 per day, 3200 per timeline max

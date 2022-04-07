@@ -9,6 +9,12 @@ import re
 env_file = open("env.json", 'r')
 env_vars = json.load(env_file)
 
+start_date = datetime.datetime(
+    env_vars["start_date"]["year"],
+    env_vars["start_date"]["month"],
+    env_vars["start_date"]["day"],
+    0, 0, 0).replace(tzinfo=datetime.timezone.utc) - datetime.timedelta(days=1)
+
 end_date = datetime.datetime(
     env_vars["end_date"]["year"], 
     env_vars["end_date"]["month"],
@@ -31,7 +37,7 @@ for f in files:
     article.set_html(html)
     article.parse()
     if article.text == "": continue
-    if article.publish_date == None or article.publish_date < end_date: continue
+    if article.publish_date is None or article.publish_date < start_date or article.publish_date > end_date: continue
     collected_articles.append({
         "title": article.title,
         "text": article.text,
@@ -40,5 +46,5 @@ for f in files:
     })
     
 print(str(len(collected_articles)) + " insight website articles found")
-output_file = open("found/found_insight_website.json", 'w')
-json.dump(collected_articles, output_file)
+with open("found/found_insight_website.json", 'w+') as output_file:
+    json.dump(collected_articles, output_file)

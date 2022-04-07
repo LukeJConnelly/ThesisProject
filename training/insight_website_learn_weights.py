@@ -67,7 +67,7 @@ def get_feature_list(model, vectorizer):
     return weighted_features
 
 
-def get_feature_weights(training_data, bound, ngram=1):
+def get_feature_weights(training_data, bound, minimum_probability, ngram=1):
     vectorizer = TfidfVectorizer(stop_words='english', lowercase=True, ngram_range=(1, ngram))
     metric_to_result = run_experiment(training_data, vectorizer)
     result = metric_to_result['fscore']
@@ -80,13 +80,14 @@ def get_feature_weights(training_data, bound, ngram=1):
     feature_weights = {}
     for f in feature_list:
         feature_weights[f[0]] = round(scalar * f[1], 2)
-    return feature_weights
+    return {k: v for k, v in feature_weights.items() if abs(v) > minimum_probability}
 
 
 random.seed(42)
 
-ngram = int(sys.argv[-2]) if sys.argv[:-1] else 3
-bound = float(sys.argv[-1]) if sys.argv[:-1] else 0.8
+ngram = int(sys.argv[-3]) if sys.argv[:-1] else 3
+bound = float(sys.argv[-2]) if sys.argv[:-1] else 0.8
+min_prob = float(sys.argv[-1]) if sys.argv[:-1] else 0.05
 
 training_data = json.load(open("insight_website_training_data.json", 'r'))
 is_epe = training_data["is_epe"]
@@ -100,7 +101,7 @@ for i, article in enumerate(found_insight_website):
     if is_training[i]:
         training_data.append({'Text': article["title"] + " " + article["text"], 'Label': is_epe[i]})
 
-word_final = get_feature_weights(training_data, bound, ngram=ngram)
+word_final = get_feature_weights(training_data, bound, min_prob, ngram=ngram)
 
 # ADAPTED FROM ANALYSIS.PY
 # Collect features across all articles
@@ -172,7 +173,7 @@ optimal_probabilities = max(accuracies, key=accuracies.get)
 
 print("Best run " + str(accuracies[optimal_probabilities]) + " " + str(optimal_probabilities))
 
-output_file = open("insight_website_suggested_weights.json", 'w')
+output_file = open("insight_website_suggested_weights.json", 'w+')
 json.dump({"initial": optimal_probabilities[0],
            "threshold": optimal_probabilities[1],
            "words": word_final},

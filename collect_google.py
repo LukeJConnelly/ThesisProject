@@ -1,3 +1,5 @@
+# Currently unsupported
+
 import json
 from random import randint
 from googlesearch import search
@@ -54,5 +56,5 @@ for person in people:
             sleep(randint(30, 40))
 
 print(str(num_found_google) + " google results found")
-output_file = open("found/found_google.json", 'w')
-json.dump(found_google, output_file)
+with open("found/found_google.json", 'w+') as output_file:
+    json.dump(found_google, output_file)

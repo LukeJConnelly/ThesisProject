@@ -143,7 +143,7 @@ pacc = tp / (tp + fn) if tp + fn != 0 else 0
 acc = (tp + tn) / len(word_probs)
 print("Accuracy was " + str((pacc + acc) / 2))
 
-file = open("model_test.csv", 'w')
+file = open("model_test.csv", 'w+')
 writer = csv.writer(file)
 for result in results:
     writer.writerow([result[0], ("Yes" if result[1] else "No")])
