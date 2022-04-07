@@ -390,8 +390,13 @@ def check_duplicates(output):
 
 slim_output = check_duplicates(output)
 
-with open("output.json", 'w') as output_file:
+with open("output.json", 'w+') as output_file:
     json.dump(slim_output, output_file)
 
-with open("EPE_"+datetime.now().strftime("%H:%M_%D")+".json", 'w') as output_file:
-    json.dump(slim_output, output_file)
+del slim_output["podcast"]
+del slim_output["tweets"]
+del slim_output["insight_website"]
+del slim_output["brainstorm"]
+del slim_output["silicon_republic"]
+with open("EPE_"+datetime.now().strftime("%H-%M_%d-%m-%y")+".json", 'w+') as full_file:
+    json.dump(slim_output, full_file)

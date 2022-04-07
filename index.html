@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="UTF-8">
+      <title>EPE Tracker Tool</title>
+   </head>
+   <body onload="handleClientLoad()">
+      <div id="blackout">Please Wait...</div>
+      <div id="signIn">
+         <header>
+         <h1>Welcome to the EPE Tracker Tool</h1>
+         </header>
+         <h3 style="color: black">Please sign in to an authenticated Google account to use the tool</h3>
+         <div id="authorize_button" class="button submit" style="height: auto">Sign In</div>
+         <script async defer src="https://apis.google.com/js/api.js"
+                 onload="this.onload=function(){};handleClientLoad()"
+                 onreadystatechange="if (this.readyState === 'complete') this.onload()">
+         </script>
+      </div>
+      <header>
+         <h1>EPE Tracker Tool</h1>
+      </header>
+      <div class="block">
+         <h2>Input</h2>
+         <div>
+            <h3>Start Date (Earliest date to include events)</h3>
+            <div id="startDate" style="margin-bottom: 1%"></div>
+            <table>
+               <tr>
+                  <th>Day</th>
+                  <th>Month</th>
+                  <th>Year</th>
+                  <th>Action</th>
+               </tr>
+               <tr>
+                  <td class="inputCell"><input id="sDay" type="text" placeholder="Day"/></td>
+                  <td class="inputCell"><input id="sMonth" type="text" placeholder="Month"/></td>
+                  <td class="inputCell"><input id="sYear" type="text" placeholder="Year"/></td>
+                  <td>
+                     <div class="button submit withText" onclick="setStartDate()">Submit</div>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <div>
+            <h3>End Date (Latest date to include events)</h3>
+            <div id="endDate" style="margin-bottom: 1%"></div>
+            <table>
+               <tr>
+                  <th>Day</th>
+                  <th>Month</th>
+                  <th>Year</th>
+                  <th>Action</th>
+               </tr>
+               <tr>
+                  <td class="inputCell"><input id="eDay" type="text" placeholder="Day"/></td>
+                  <td class="inputCell"><input id="eMonth" type="text" placeholder="Month"/></td>
+                  <td class="inputCell"><input id="eYear" type="text" placeholder="Year"/></td>
+                  <td>
+                     <div class="button submit withText" onclick="setEndDate()">Submit</div>
+                  </td>
+               </tr>
+            </table>
+         </div>
+         <div>
+            <h3>People</h3>
+            <table id="people"></table>
+         </div>
+         <div>
+            <h3>Pages</h3>
+            <table id="pages">
+            </table>
+         </div>
+      </div>
+      <div class="block">
+         <h2>Config</h2>
+         <div>
+            <h3>Audience Estimates</h3>
+         </div>
+         <table id="audienceEstimates"></table>
+         <div>
+            <h3>Probability Weights</h3>
+            <div id="probWeights">
+               <h4>Tweets</h4>
+               <table>
+                  <tr>
+                     <th>Config Name</th>
+                     <th>Value</th>
+                  </tr>
+                  <tr>
+                     <td>Initial (Starting Probability)</td>
+                     <td class="inputCell"><input id="twitterInitial" type="text" placeholder="Initial"/></td>
+                  </tr>
+                  <tr>
+                     <td>Threshold (Required Certainty)</td>
+                     <td class="inputCell"><input id="twitterThreshold" type="text" placeholder="Threshold"/></td>
+                  </tr>
+                  <tr>
+                     <td colspan="2">
+                        <div class="button submit withText" onclick="setTProbabilityWeights()">Update</div>
+                     </td>
+                  </tr>
+               </table>
+               <table id="twitterHashtags">
+                  <tr>
+                     <th>Hashtag</th>
+                     <th>Likelihood (between 1 and -1)</th>
+                     <th colspan="2">Action</th>
+                  </tr>
+               </table>
+               <table id="twitterUsers">
+                  <tr>
+                     <th>User</th>
+                     <th>Likelihood (between 1 and -1)</th>
+                     <th colspan="2">Action</th>
+                  </tr>
+               </table>
+               <table id="twitterWords">
+                  <tr>
+                     <th>Word</th>
+                     <th>Likelihood (between 1 and -1)</th>
+                     <th colspan="2">Action</th>
+                  </tr>
+               </table>
+               <h4>Articles</h4>
+               <table>
+                  <tr>
+                     <th>Config Name</th>
+                     <th>Value</th>
+                  </tr>
+                  <tr>
+                     <td>Initial (Starting Probability)</td>
+                     <td class="inputCell"><input id="articleInitial" type="text" placeholder="Initial"/></td>
+                  </tr>
+                  <tr>
+                     <td>Threshold (Required Certainty)</td>
+                     <td class="inputCell"><input id="articleThreshold" type="text" placeholder="Threshold"/></td>
+                  </tr>
+                  <tr>
+                     <td colspan="2">
+                        <div class="button submit withText" onclick="setAProbabilityWeights()">Update</div>
+                     </td>
+                  </tr>
+               </table>
+               <table id="articleWords">
+                  <tr>
+                     <th>Word</th>
+                     <th>Likelihood (between 1 and -1)</th>
+                     <th colspan="2">Action</th>
+                  </tr>
+               </table>
+            </div>
+         </div>
+      </div>
+      <div class="block">
+         <h2>Run</h2>
+         <div id="run">
+            <a href="https://colab.research.google.com/drive/1_06Yg007qp3vs4CAaSrNDWg5B7acf0wW#scrollTo=d51adb9a-bbc6-493f-b191-1cadd48cf432">Click here to access and run the Google Colab</a>
+         </div>
+      </div>
+      <div class="block">
+         <h2>Output <small onclick="getOutput()" style="cursor: pointer; color: midnightblue">(Click here to refresh)</small></h2>
+         <div class="button submit withText" onclick="downloadCSV()" style="background-color: midnightblue; margin-bottom: 1%">Click to download as .CSV</div>
+         <div id="output">
+         </div>
+      </div>
+      <div style="height: 100px"></div>
+      <div id="footer">
+         Jump To...
+         <table>
+            <td><a href="#endDate">Start Date</a></td>
+            <td><a href="#people">People</a></td>
+            <td><a href="#pages">Pages</a></td>
+            <td><a href="#audienceEstimates">Audience Estimates</a></td>
+            <td><a href="#probWeights">Probabilities</a></td>
+            <td><a href="#twitterHashtags">Hashtags</a></td>
+            <td><a href="#twitterUsers">Twitter Users</a></td>
+            <td><a href="#twitterWords">Twitter Words</a></td>
+            <td><a href="#articleWords">Article Words</a></td>
+            <td><a href="#output">Output</a></td>
+         </table>
+      </div>
+      <script>
+         function setup() {
+             getPeople();
+             getPages();
+             getStartDate();
+             getEndDate();
+             getAudienceEstimates()
+             getProbabilityWeights()
+             getOutput();
+         }
+         let tHashtags = [];
+         let tUsers = [];
+         let tWords = [];
+         let aWords = [];
+         let csvContent = "";
+         async function removePerson(person) {
+             let response = await makeRequest({'function': 'removePerson', "parameters": [person]})
+             if ('error' in JSON.parse(response)) {
+                 alert('There was an error with the request')
+             }
+             else {
+                 alert('Successfully removed '+person)
+                 getPeople()
+             }
+         }
+         async function addPerson() {
+             let personName = document.getElementById('personName').value.trim();
+             let personTwitter = document.getElementById('personTwitter').value;
+             if (personTwitter === '') {
+                 personTwitter = undefined;
+             }
+             if (!/^[a-zA-Z0-9_]{1,15}$/.test(personTwitter) && personTwitter!==undefined) {
+                 alert('Twitter should be 1-15 characters using only a-z A-Z 0-9 and _, please do not include the @')
+                 return;
+             }
+             let response = await makeRequest({'function': 'addPerson', "parameters": [personName, personTwitter]})
+             if ('error' in JSON.parse(response)) {
+                 alert('There was an error with the request')
+             }
+             else {
+                 alert('Successfully added '+personName)
+                 getPeople()
+             }
+         }
+         async function getPeople() {
+             let response = await makeRequest({'function': 'getPeople'})
+             if ('error' in JSON.parse(response)) {
+                 document.getElementById('people').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let html = '<table id="people"><tr><th>Name</th><th>Twitter</th><th>Action</th></tr>'
+                 resp = JSON.parse(response)["response"]["result"];
+                 for (let person in resp) {
+                     html+='<tr><td>'+person+'</td><td>';
+                     html+= (resp[person]["twitter"] === undefined ? '<i>No Twitter Provided<\i>' : resp[person]["twitter"]);
+                     html+='</td><td>';
+                     html+='<div class="button remove" '
+                     html+='onclick="removePerson(\''+person+'\')">X</div></td></tr>'
+                 }
+                 html += '<tr><td class="inputCell"><input id="personName" placeholder="Name"/></td>'
+                 html += '<td class="inputCell"><input id="personTwitter" type="text" placeholder="Twitter (exclude @)"/></td>'
+                 html += '<td><div class="button submit" onclick="addPerson()">+</div></td></tr></table>'
+                 document.getElementById('people').innerHTML = html;
+             }
+         }
+         async function removePage(page) {
+             let response = await makeRequest({'function': 'removePage', "parameters": [page]})
+             if ('error' in JSON.parse(response)) {
+                 alert('There was an error with the request')
+             }
+             else {
+                 alert('Successfully removed '+page)
+                 getPages()
+             }
+         }
+         async function addPage() {
+             let pageName = document.getElementById('pageName').value.trim();
+             let pageTwitter = document.getElementById('pageTwitter').value;
+             if (!/^[a-zA-Z0-9_]{1,15}$/.test(pageTwitter)) {
+                 alert('Twitter should be 1-15 characters using only a-z A-Z 0-9 and _, please do not include the @')
+                 return;
+             }
+             let response = await makeRequest({'function': 'addPage', "parameters": [pageName, pageTwitter]})
+             if ('error' in JSON.parse(response)) {
+                 alert('There was an error with the request')
+             }
+             else {
+                 alert('Successfully added '+pageName)
+                 getPages()
+             }
+         }
+         async function getPages() {
+             let response = await makeRequest({'function': 'getPages'})
+             if ('error' in JSON.parse(response)) {
+                 document.getElementById('pages').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let html = '<table id="pages"><tr><th>Name</th><th>Twitter</th><th>Action</th></tr>'
+                 resp = JSON.parse(response)["response"]["result"];
+                 for (let page in resp) {
+                     html+='<tr><td style="padding: 1%;">'+page+'</td><td>';
+                     html+= resp[page]["twitter"];
+                     html+='</td><td>';
+                     html+='<div class="button remove" ';
+                     html+='onclick="removePage(\''+page+'\')">X</div></td></tr>'
+                 }
+                 html += '<tr><td class="inputCell"><input id="pageName" type="text" placeholder="Name"/></td>'
+                 html+='<td class="inputCell"><input id="pageTwitter" type="text" placeholder="Twitter (exclude @)"/></td>'
+                 html+='<td><div class="button submit" onclick="addPage()">+</div></td></tr></table>'
+                 document.getElementById('pages').innerHTML = html;
+             }
+         }
+         async function getStartDate() {
+             let response = await makeRequest({'function': 'getStartDate'})
+             if ('error' in JSON.parse(response)) {
+                 document.getElementById('startDate').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let html = 'Currently set as: '
+                 resp = JSON.parse(response)["response"]["result"];
+                 html += resp["day"] + '/' + resp["month"] + '/' + resp["year"];
+                 document.getElementById('startDate').innerHTML = html;
+                 document.getElementById('sYear').value = resp["year"];
+                 document.getElementById('sMonth').value = resp["month"];
+                 document.getElementById('sDay').value = resp["day"];
+             }
+         }
+         async function getEndDate() {
+             let response = await makeRequest({'function': 'getEndDate'})
+             if ('error' in JSON.parse(response)) {
+                 document.getElementById('endDate').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let html = 'Currently set as: '
+                 resp = JSON.parse(response)["response"]["result"];
+                 html += resp["day"] + '/' + resp["month"] + '/' + resp["year"];
+                 document.getElementById('endDate').innerHTML = html;
+                 document.getElementById('eYear').value = resp["year"];
+                 document.getElementById('eMonth').value = resp["month"];
+                 document.getElementById('eDay').value = resp["day"];
+             }
+         }
+         async function setStartDate() {
+             let y = document.getElementById('sYear').value.trim();
+             let m = document.getElementById('sMonth').value.trim();
+             let d = document.getElementById('sDay').value.trim();
+             if (!/^20[123][0-9]$/.test(y)) {
+                 alert('That year doesn\'t look right... Please ensure it is in the range 2010 - 2039')
+                 return;
+             }
+             if (!/^(1[0-2]|[0-9])$/.test(m)) {
+                 alert('That month doesn\'t look right... Please ensure it is between 1 and 12 with no preceding 0s')
+                 return;
+             }
+             if (!/^(3[01]|[12][0-9]|[1-9])$/.test(d)) {
+                 alert('That day doesn\'t look right... Please ensure it is between 1 and 31 with no preceding 0s')
+                 return;
+             }
+             let y2 = parseInt(document.getElementById('eYear').value.trim());
+             let m2 = parseInt(document.getElementById('eMonth').value.trim());
+             let d2 = parseInt(document.getElementById('eDay').value.trim());
+             if (y2 < parseInt(y) || (y2 === parseInt(y) && (m2 < parseInt(m) || (m2 === parseInt(m) && d2 <= parseInt(d))))) {
+                alert('It looks like your end date is before/on your start date!')
+                return;
+             }
+             let response = await makeRequest({'function': 'setStartDate', "parameters": [parseInt(y), parseInt(m), parseInt(d)]})
+             if ('error' in JSON.parse(response)) {
+                 alert('There was an error with the request');
+             }
+             else {
+                 alert('Successfully set new start date');
+                 getStartDate();
+             }
+         }
+         async function setEndDate() {
+             let y = document.getElementById('eYear').value.trim();
+             let m = document.getElementById('eMonth').value.trim();
+             let d = document.getElementById('eDay').value.trim();
+             if (!/^20[123][0-9]$/.test(y)) {
+                 alert('That year doesn\'t look right... Please ensure it is in the range 2010 - 2039')
+                 return;
+             }
+             if (!/^(1[0-2]|[0-9])$/.test(m)) {
+                 alert('That month doesn\'t look right... Please ensure it is between 1 and 12 with no preceding 0s')
+                 return;
+             }
+             if (!/^(3[01]|[12][0-9]|[1-9])$/.test(d)) {
+                 alert('That day doesn\'t look right... Please ensure it is between 1 and 31 with no preceding 0s')
+                 return;
+             }
+             let y2 = parseInt(document.getElementById('sYear').value.trim());
+             let m2 = parseInt(document.getElementById('sMonth').value.trim());
+             let d2 = parseInt(document.getElementById('sDay').value.trim());
+             if (y2 > parseInt(y) || (y2 === parseInt(y) && (m2 > parseInt(m) || (m2 === parseInt(m) && d2 >= parseInt(d))))) {
+                alert('It looks like your start date is after/on your end date!')
+                return;
+             }
+             let response = await makeRequest({'function': 'setEndDate', "parameters": [parseInt(y), parseInt(m), parseInt(d)]})
+             if ('error' in JSON.parse(response)) {
+                 alert('There was an error with the request');
+             }
+             else {
+                 alert('Successfully set new end date');
+                 getEndDate();
+             }
+         }
+         async function removeSource(source) {
+             let getResponse = await makeRequest({'function': 'getAudienceEstimate'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('audienceEstimates').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(getResponse)["response"]["result"];
+                 delete resp["external"][source]
+                 let response = await makeRequest({'function': 'setAudienceEstimate', "parameters": [resp]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully removed '+source);
+                     getAudienceEstimates();
+                 }
+             }
+         }
+         async function addAudienceEstimate() {
+             let est = document.getElementById('audienceEstimate').value.trim()
+             let source = document.getElementById('audienceSource').value.trim()
+             if (!/^(\d+)$/.test(est)) {
+                 alert(est + ' is not a valid audience estimate');
+                 return;
+             }
+             if (!/^([a-z ./':?0-9]{3,})$/.test(source)) {
+                 alert(source + ' is not a valid audience source. Please ensure it is lowercase and minimum 3 characters long');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getAudienceEstimate'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('audienceEstimates').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(getResponse)["response"]["result"];
+                 resp["external"][source] = parseInt(est)
+                 let response = await makeRequest({'function': 'setAudienceEstimate', "parameters": [resp]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully set new audience estimates');
+                     getAudienceEstimates();
+                 }
+             }
+         }
+         async function setAudienceEstimate() {
+             let twitter = document.getElementById('twitterEstimate').value.trim()
+             let insightWebsite = document.getElementById('insightEstimate').value.trim()
+             let podcast = document.getElementById('podcastEstimate').value.trim()
+             let brainstorm = document.getElementById('brainstormEstimate').value.trim()
+             let siliconRepublic = document.getElementById('siliconRepublicEstimate').value.trim()
+             let flag = false;
+             [twitter, insightWebsite, podcast, brainstorm, siliconRepublic].forEach(x => {
+                 if (!flag){
+                     if (!/^(\d+|unknown)$/.test(x)) {
+                         alert(x+ ' is not a valid audience value');
+                         flag = true;
+                     }
+                 }
+             })
+             if (flag) {
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getAudienceEstimate'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('audienceEstimates').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(getResponse)["response"]["result"];
+                 let newEstimate = {
+                     "twitter": twitter === 'unknown' ? 'unknown' :parseInt(twitter),
+                     "insight_website": insightWebsite === 'unknown' ? 'unknown' : parseInt(insightWebsite),
+                     "podcast": podcast === 'unknown' ? 'unknown' :parseInt(podcast),
+                     "brainstorm": brainstorm === 'unknown' ? 'unknown' : parseInt(brainstorm),
+                     "silicon_republic": siliconRepublic === 'unknown' ? 'unknown' : parseInt(siliconRepublic),
+                     "external": resp["external"]
+                 }
+                 let response = await makeRequest({'function': 'setAudienceEstimate', "parameters": [newEstimate]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully set new audience estimates');
+                     getAudienceEstimates();
+                 }
+             }
+         }
+         async function getAudienceEstimates() {
+             let getResponse = await makeRequest({'function': 'getAudienceEstimate'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('audienceEstimates').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let html = '<table id="audienceEstimates"><tr><th colspan="2">Source</th><th>Estimate</th></tr>'
+                 let resp = JSON.parse(getResponse)["response"]["result"];
+                 html+='<tr><td colspan="2">Twitter</td><td class="inputCell"><input id="twitterEstimate" type="text" placeholder="Audience Estimate (can be unknown)" value="'+resp["twitter"]+'"/></td></tr>'
+                 html+='<tr><td colspan="2">Insight Website</td><td class="inputCell"><input id="insightEstimate" type="text" placeholder="Audience Estimate (can be unknown)" value="'+resp["insight_website"]+'"/></td></tr>'
+                 html+='<tr><td colspan="2">Podcast</td><td class="inputCell"><input id="podcastEstimate" type="text" placeholder="Audience Estimate (can be unknown)" value="'+resp["podcast"]+'"/></td></tr>'
+                 html+='<tr><td colspan="2">RTÉ Brainstorm</td><td class="inputCell"><input id="brainstormEstimate" type="text" placeholder="Audience Estimate (can be unknown)" value="'+resp["brainstorm"]+'"/></td></tr>'
+                 html+='<tr><td colspan="2">Silicon Republic</td><td class="inputCell"><input id="siliconRepublicEstimate" type="text" placeholder="Audience Estimate (can be unknown)" value="'+resp["silicon_republic"]+'"/></td></tr>'
+                 html+='<tr><td colspan="3"><div class="button submit withText" onclick="setAudienceEstimate()">Update</div></td></tr>'
+                 html+='<tr><th colspan="3">External Sources</th></tr>'
+                 html+='<tr><th>Source</th><th>Estimate</th><th>Action</th></tr>'
+                 for (let source in resp["external"]) {
+                     html+='<tr><td style="padding: 1%;">'+source+'</td><td>';
+                     html+= resp["external"][source];
+                     html+='</td><td><div class="button remove" '
+                     html+='onclick="removeSource(\''+source+'\')">X</div></td></tr>'
+                 }
+                 html += '<tr><td class="inputCell"><input id="audienceSource" type="text" placeholder="Source (lowercase)"/></td>'
+                 html+='<td class="inputCell"><input id="audienceEstimate" type="text" placeholder="Audience Estimate"/></td><td>'
+                 html+='<div class="button submit" onclick="addAudienceEstimate()">+</div></td></tr></table>'
+                 document.getElementById('audienceEstimates').innerHTML = html;
+             }
+         }
+             function paginateTUsers(pageNum) {
+             html = '<table id="twitterUsers"><tr><th>User</th><th>Likelihood (between 1 and -1)</th><th colspan="2">Action</th></tr>'
+             for (let u in tUsers) {
+                 if (u<(10*pageNum) && u>=(10*(pageNum-1))) {
+                     html += '<tr><td>' + tUsers[u][0] + '</td><td class="inputCell">';
+                     html += '<input id="tUser' + u + '" type="text" placeholder="Likelihood (between 1 and -1)" value="' + tUsers[u][1] + '"/></td>'
+                     html += '<td><div class="button submit withText" onclick="updateTUser(\'' + u + '\')">Update</td>'
+                     html += '<td><div class="button remove" onclick="removeTUser(\'' + u + '\')">X</td></tr>'
+                 }
+             }
+             html+='<tr><td colspan="4" class="inputCell">Page '+pageNum+'</td></tr><tr><td colspan="4" class="inputCell">'
+             for (let i = 1; i <= Math.ceil(tUsers.length/10); i++) {
+                 html+='<small class="button" style="color: black" onclick="paginateTUsers(\''+i+'\')">'+i+' </small>'
+             }
+             html += '</tr><tr><td class="inputCell"><input id="tUser" type="text" placeholder="User"/></td>'
+             html+='<td class="inputCell"><input id="tUserProb" type="text" placeholder="Likelihood (between 1 and -1)"/></td><td colspan="2">'
+             html+='<div class="button submit" onclick="addTUser()">+</div></td></tr></table>'
+             document.getElementById('twitterUsers').innerHTML = html
+         }
+         async function addTUser() {
+             let userToAdd = document.getElementById('tUser').value.trim()
+             let probToAdd = document.getElementById('tUserProb').value.trim()
+             if (!/^[a-zA-Z0-9_]{1,15}$/.test(userToAdd)) {
+                 alert('Twitter should be 1-15 characters using only a-z A-Z 0-9 and _, please do not include the @')
+                 return;
+             }
+             if (!/^(-?[0]*\.[0-9]*[1-9][0-9]*)$/.test(probToAdd)) {
+                 alert(probToAdd + ' is not a valid value. Please ensure it is greater than -1 and less than 1 (-1 being impossible, +1 being certain).');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 resp["tweets"]["users"][userToAdd] = parseFloat(probToAdd)
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully set new Twitter user value');
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function removeTUser(u) {
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 delete resp["tweets"]["users"][tUsers[u][0]]
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully removed '+tUsers[u][0]+' from Twitter user value list');
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function updateTUser(u) {
+             let probToAdd = document.getElementById('tUser'+u).value.trim()
+             if (!/^(-?[0]*\.[0-9]*[1-9][0-9]*)$/.test(probToAdd)) {
+                 alert(probToAdd + ' is not a valid value. Please ensure it is greater than -1 and less than 1 (-1 being impossible, +1 being certain)');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 resp["tweets"]["users"][tUsers[u][0]] = parseFloat(probToAdd)
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully updated @'+tUsers[u][0]+'\'s Twitter value to '+probToAdd);
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         function paginateTHashtags(pageNum) {
+             html = '<table id="twitterHashtags"><tr><th>Hashtag</th><th>Likelihood (between 1 and -1)</th><th colspan="2">Action</th></tr>'
+             for (let t in tHashtags) {
+                 if (t<(10*pageNum) && t>=(10*(pageNum-1))) {
+                     html += '<tr><td>' + tHashtags[t][0] + '</td><td class="inputCell">';
+                     html += '<input id="tHashtag' + t + '" type="text" placeholder="Likelihood (between 1 and -1)" value="' + tHashtags[t][1] + '"/></td>'
+                     html += '<td><div class="button submit withText" onclick="updateTHashtag(\'' + t + '\')">Update</td>'
+                     html += '<td><div class="button remove" onclick="removeTHashtag(\'' + t + '\')">X</td></tr>'
+                 }
+             }
+             html+='<tr><td colspan="4" class="inputCell">Page '+pageNum+'</td></tr><tr><td colspan="4" class="inputCell">'
+             for (let i = 1; i <= Math.ceil(tHashtags.length/10); i++) {
+                 html+='<small class="button" style="color: black" onclick="paginateTHashtags(\''+i+'\')">'+i+' </small>'
+             }
+             html += '</tr><tr><td class="inputCell"><input id="tHashtag" type="text" placeholder="Hashtag"/></td>'
+             html+='<td class="inputCell"><input id="tHashtagProb" type="text" placeholder="Likelihood (between 1 and -1)"/></td><td colspan="2">'
+             html+='<div class="button submit" onclick="addTHashtag()">+</div></td></tr></table>'
+             document.getElementById('twitterHashtags').innerHTML = html
+         }
+         async function addTHashtag() {
+             let hashtagToAdd = document.getElementById('tHashtag').value.trim()
+             let probToAdd = document.getElementById('tHashtagProb').value.trim()
+             if (!/^[a-z_0-9]+$/.test(hashtagToAdd)) {
+                 alert('Hashtag should exclude # symbol and be comprised of lowercase a-z, numbers and if necessary an _')
+                 return;
+             }
+             if (!/^(-?[0]*\.[0-9]*[1-9][0-9]*)$/.test(probToAdd)) {
+                 alert(probToAdd + ' is not a valid value. Please ensure it is greater than -1 and less than 1 (-1 being impossible, +1 being certain)');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 resp["tweets"]["hashtags"][hashtagToAdd] = parseFloat(probToAdd)
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully set new Twitter hashtag value');
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function removeTHashtag(t) {
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 delete resp["tweets"]["hashtags"][tHashtags[t][0]]
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully removed '+tHashtags[t][0]+' from Twitter hashtag value list');
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function updateTHashtag(t) {
+             let probToAdd = document.getElementById('tHashtag'+t).value.trim()
+             if (!/^(-?[0]*\.[0-9]*[1-9][0-9]*)$/.test(probToAdd)) {
+                 alert(probToAdd + ' is not a valid value. Please ensure it is greater than -1 and less than 1 (-1 being impossible, +1 being certain)');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 resp["tweets"]["hashtags"][tHashtags[t][0]] = parseFloat(probToAdd)
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully updated #'+tHashtags[t][0]+'\'s Twitter value to '+probToAdd);
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         function paginateTWords(pageNum) {
+             html = '<table id="twitterWords"><tr><th>Word</th><th>Likelihood (between 1 and -1)</th><th colspan="2">Action</th></tr>'
+             for (let w in tWords) {
+                 if (w<(10*pageNum) && w>=(10*(pageNum-1))) {
+                     html += '<tr><td>' + tWords[w][0] + '</td><td class="inputCell">';
+                     html += '<input id="tWord' + w + '" type="text" placeholder="Likelihood (between 1 and -1)" value="' + tWords[w][1] + '"/></td>'
+                     html += '<td><div class="button submit withText" onclick="updateTWord(\'' + w + '\')">Update</td>'
+                     html += '<td><div class="button remove" onclick="removeTWord(\'' + w + '\')">X</td></tr>'
+                 }
+             }
+             html+='<tr><td colspan="4" class="inputCell">Page '+pageNum+'</td></tr><tr><td colspan="4" class="inputCell">'
+             for (let i = 1; i <= Math.ceil(tWords.length/10); i++) {
+                 html+='<small class="button" style="color: black" onclick="paginateTWords(\''+i+'\')">'+i+' </small>'
+             }
+             html += '</tr><tr><td class="inputCell"><input id="tWord" type="text" placeholder="Word"/></td>'
+             html+='<td class="inputCell"><input id="tWordProb" type="text" placeholder="Likelihood (between 1 and -1)"/></td><td colspan="2">'
+             html+='<div class="button submit" onclick="addTWord()">+</div></td></tr></table>'
+             document.getElementById('twitterWords').innerHTML = html
+         }
+         async function addTWord() {
+             let wordToAdd = document.getElementById('tWord').value.trim()
+             let probToAdd = document.getElementById('tWordProb').value.trim()
+             if (!/[a-z0-9_]+( [a-z0-9_]+)*$/.test(wordToAdd)) {
+                 alert('Word should be comprised of lowercase a-z, numbers and if necessary an _')
+                 return;
+             }
+             if (!/^(-?[0]*\.[0-9]*[1-9][0-9]*)$/.test(probToAdd)) {
+                 alert(probToAdd + ' is not a valid value. Please ensure it is greater than -1 and less than 1 (-1 being impossible, +1 being certain)');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 resp["tweets"]["words"][wordToAdd] = parseFloat(probToAdd)
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully set new Twitter word value');
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function removeTWord(w) {
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 delete resp["tweets"]["words"][tWords[w][0]]
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully removed '+tWords[w][0]+' from Twitter word value list');
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function updateTWord(w) {
+             let probToAdd = document.getElementById('tWord'+w).value.trim()
+             if (!/^(-?[0]*\.[0-9]*[1-9][0-9]*)$/.test(probToAdd)) {
+                 alert(probToAdd + ' is not a valid value. Please ensure it is greater than -1 and less than 1 (-1 being impossible, +1 being certain)');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 resp["tweets"]["words"][tWords[w][0]] = parseFloat(probToAdd)
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully updated '+tWords[w][0]+'\'s Twitter value to '+probToAdd);
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         function paginateAWords(pageNum) {
+             html = '<table id="articleWords"><tr><th>Word</th><th>Likelihood (between 1 and -1)</th><th colspan="2">Action</th></tr>'
+             for (let w in aWords) {
+                 if (w<(10*pageNum) && w>=(10*(pageNum-1))) {
+                     html += '<tr><td>' + aWords[w][0] + '</td><td class="inputCell">';
+                     html += '<input id="aWord' + w + '" type="text" placeholder="Likelihood (between 1 and -1)" value="' + aWords[w][1] + '"/></td>'
+                     html += '<td><div class="button submit withText" onclick="updateAWord(\'' + w + '\')">Update</td>'
+                     html += '<td><div class="button remove" onclick="removeAWord(\'' + w + '\')">X</td></tr>'
+                 }
+             }
+             html+='<tr><td colspan="4" class="inputCell">Page '+pageNum+'</td></tr><tr><td colspan="4" class="inputCell">'
+             for (let i = 1; i <= Math.ceil(aWords.length/10); i++) {
+                 html+='<small class="button" style="color: black" onclick="paginateAWords(\''+i+'\')">'+i+' </small>'
+             }
+             html += '</tr><tr><td class="inputCell"><input id="aWord" type="text" placeholder="Word"/></td>'
+             html+='<td class="inputCell"><input id="aWordProb" type="text" placeholder="Likelihood (between 1 and -1)"/></td><td colspan="2">'
+             html+='<div class="button submit" onclick="addAWord()">+</div></td></tr></table>'
+             document.getElementById('articleWords').innerHTML = html
+         }
+         async function addAWord() {
+             let wordToAdd = document.getElementById('aWord').value.trim()
+             let probToAdd = document.getElementById('aWordProb').value.trim()
+             if (!/[a-z0-9_]+( [a-z0-9_]+)*$/.test(wordToAdd)) {
+                 alert('Word should be comprised of lowercase a-z, numbers and if necessary an _')
+                 return;
+             }
+             if (!/^(-?[0]*\.[0-9]*[1-9][0-9]*)$/.test(probToAdd)) {
+                 alert(probToAdd + ' is not a valid value. Please ensure it is greater than -1 and less than 1 (-1 being impossible, +1 being certain)');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 resp["article"]["words"][wordToAdd] = parseFloat(probToAdd)
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully set new Article word value');
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function removeAWord(w) {
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 delete resp["article"]["words"][aWords[w][0]]
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully removed '+aWords[w][0]+' from Article word value list');
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function updateAWord(w) {
+             let probToAdd = document.getElementById('aWord'+w).value.trim()
+             if (!/^(-?[0]*\.[0-9]*[1-9][0-9]*)$/.test(probToAdd)) {
+                 alert(probToAdd + ' is not a valid value. Please ensure it is greater than -1 and less than 1 (-1 being impossible, +1 being certain)');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 resp["article"]["words"][aWords[w][0]] = parseFloat(probToAdd)
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully updated '+aWords[w][0]+'\'s Article value to '+probToAdd);
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function setTProbabilityWeights() {
+             let initProb = document.getElementById('twitterInitial').value.trim()
+             let threshProb = document.getElementById('twitterThreshold').value.trim()
+             if (!/^([0]*\.[0-9]*[1-9][0-9]*)$/.test(initProb) || !/^([0]*\.[0-9]*[1-9][0-9]*)$/.test(threshProb)) {
+                 alert(probToAdd + ' is not a valid probability. Please ensure it is greater than 0 and less than 1.');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 resp["tweets"]["initial"] = parseFloat(initProb)
+                 resp["tweets"]["threshold"] = parseFloat(threshProb)
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully updated Initial and Threshold Twitter probabilities');
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function setAProbabilityWeights() {
+             let initProb = document.getElementById('articleInitial').value.trim()
+             let threshProb = document.getElementById('articleThreshold').value.trim()
+             if (!/^([0]*\.[0-9]*[1-9][0-9]*)$/.test(initProb) || !/^([0]*\.[0-9]*[1-9][0-9]*)$/.test(threshProb)) {
+                 alert(probToAdd + ' is not a valid probability. Please ensure it is greater than 0 and less than 1.');
+                 return;
+             }
+             let getResponse = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(getResponse)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(getResponse)["response"]["result"]);
+                 resp["article"]["initial"] = parseFloat(initProb)
+                 resp["article"]["threshold"] = parseFloat(threshProb)
+                 let response = await makeRequest({'function': 'setProbabilityWeights', "parameters": [resp["article"], resp["tweets"]]})
+                 if ('error' in JSON.parse(response)) {
+                     alert('There was an error with the request');
+                 }
+                 else {
+                     alert('Successfully updated Initial and Threshold Article probabilities');
+                     getProbabilityWeights()
+                 }
+             }
+         }
+         async function getProbabilityWeights() {
+             let response = await makeRequest({'function': 'getProbabilityWeights'})
+             if ('error' in JSON.parse(response)) {
+                 document.getElementById('probWeights').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(response)["response"]["result"]);
+                 document.getElementById('twitterInitial').value = resp["tweets"]["initial"];
+                 document.getElementById('twitterThreshold').value = resp["tweets"]["threshold"];
+                 document.getElementById('articleInitial').value = resp["article"]["initial"];
+                 document.getElementById('articleThreshold').value = resp["article"]["threshold"];
+                 let html = '<table id="twitterHashtags"><tr><th>Hashtag</th><th>Likelihood (between 1 and -1)</th><th colspan="2">Action</th></tr>'
+                 tHashtags = Object.entries(resp["tweets"]["hashtags"]).sort(function(x, y){return x[1] < y[1] ? -1 : 1}).reverse()
+                 for (let t in tHashtags) {
+                     if (t<10) {
+                         html += '<tr><td>' + tHashtags[t][0] + '</td><td class="inputCell">';
+                         html += '<input id="tHashtag' + t + '" type="text" placeholder="Likelihood (between 1 and -1)" value="' + tHashtags[t][1] + '"/></td>'
+                         html += '<td><div class="button submit withText" onclick="updateTHashtag(\'' + t + '\')">Update</td>'
+                         html += '<td><div class="button remove" onclick="removeTHashtag(\'' + t + '\')">X</td></tr>'
+                     }
+                 }
+                 html+='<tr><td colspan="4" class="inputCell">Page 1</td></tr><tr><td colspan="4" class="inputCell">'
+                 for (let i = 1; i <= Math.ceil(tHashtags.length/10); i++) {
+                     html+='<small class="button" style="color: black" onclick="paginateTHashtags(\''+i+'\')">'+i+' </small>'
+                 }
+                 html += '</tr><tr><td class="inputCell"><input id="tHashtag" type="text" placeholder="Hashtag"/></td>'
+                 html+='<td class="inputCell"><input id="tHashtagProb" type="text" placeholder="Likelihood (between 1 and -1)"/></td><td colspan="2">'
+                 html+='<div class="button submit" onclick="addTHashtag()">+</div></td></tr></table>'
+                 document.getElementById('twitterHashtags').innerHTML = html
+                 html = '<table id="twitterUsers"><tr><th>User</th><th>Likelihood (between 1 and -1)</th><th colspan="2">Action</th></tr>'
+                 tUsers = Object.entries(resp["tweets"]["users"]).sort(function(x, y){return x[1] < y[1] ? -1 : 1}).reverse()
+                 for (let u in tUsers) {
+                     if (u<10) {
+                         html += '<tr><td>' + tUsers[u][0] + '</td><td class="inputCell">';
+                         html += '<input id="tUser' + u + '" type="text" placeholder="Likelihood (between 1 and -1)" value="' + tUsers[u][1] + '"/></td>'
+                         html += '<td><div class="button submit withText" onclick="updateTUser(\'' + u + '\')">Update</td>'
+                         html += '<td><div class="button remove" onclick="removeTUser(\'' + u + '\')">X</td></tr>'
+                     }
+                 }
+                 html+='<tr><td colspan="4" class="inputCell">Page 1</td></tr><tr><td colspan="4" class="inputCell">'
+                 for (let i = 1; i <= Math.ceil(tUsers.length/10); i++) {
+                     html+='<small class="button" style="color: black" onclick="paginateTUsers(\''+i+'\')">'+i+' </small>'
+                 }
+                 html += '</tr><tr><td class="inputCell"><input id="tUser" type="text" placeholder="User"/></td>'
+                 html+='<td class="inputCell"><input id="tUserProb" type="text" placeholder="Likelihood (between 1 and -1)"/></td><td colspan="2">'
+                 html+='<div class="button submit" onclick="addTUser()">+</div></td></tr></table>'
+                 document.getElementById('twitterUsers').innerHTML = html
+                 html = '<table id="twitterWords"><tr><th>Word</th><th>Likelihood (between 1 and -1)</th><th colspan="2">Action</th></tr>'
+                 tWords = Object.entries(resp["tweets"]["words"]).sort(function(x, y){return x[1] < y[1] ? -1 : 1}).reverse()
+                 for (let w in tWords) {
+                     if (w<10) {
+                         html += '<tr><td>' + tWords[w][0] + '</td><td class="inputCell">';
+                         html += '<input id="tWord' + w + '" type="text" placeholder="Likelihood (between 1 and -1)" value="' + tWords[w][1] + '"/></td>'
+                         html += '<td><div class="button submit withText" onclick="updateTWord(\'' + w + '\')">Update</td>'
+                         html += '<td><div class="button remove" onclick="removeTWord(\'' + w + '\')">X</td></tr>'
+                     }
+                 }
+                 html+='<tr><td colspan="4" class="inputCell">Page 1</td></tr><tr><td colspan="4" class="inputCell">'
+                 for (let i = 1; i <= Math.ceil(tWords.length/10); i++) {
+                     html+='<small class="button" style="color: black" onclick="paginateTWords(\''+i+'\')">'+i+' </small>'
+                 }
+                 html += '</tr><tr><td class="inputCell"><input id="tWord" type="text" placeholder="Word"/></td>'
+                 html+='<td class="inputCell"><input id="tWordProb" type="text" placeholder="Likelihood (between 1 and -1)"/></td><td colspan="2">'
+                 html+='<div class="button submit" onclick="addTWord()">+</div></td></tr></table>'
+                 document.getElementById('twitterWords').innerHTML = html
+                 html = '<table id="articleWords"><tr><th>Word</th><th>Likelihood (between 1 and -1)</th><th colspan="2">Action</th></tr>'
+                 aWords = Object.entries(resp["article"]["words"]).sort(function(x, y){return x[1] < y[1] ? -1 : 1}).reverse()
+                 for (let w in aWords) {
+                     if (w<10) {
+                         html += '<tr><td>' + aWords[w][0] + '</td><td class="inputCell">';
+                         html += '<input id="aWord' + w + '" type="text" placeholder="Likelihood (between 1 and -1)" value="' + aWords[w][1] + '"/></td>'
+                         html += '<td><div class="button submit withText" onclick="updateAWord(\'' + w + '\')">Update</td>'
+                         html += '<td><div class="button remove" onclick="removeAWord(\'' + w + '\')">X</td></tr>'
+                     }
+                 }
+                 html+='<tr><td colspan="4" class="inputCell">Page 1</td></tr><tr><td colspan="4" class="inputCell">'
+                 for (let i = 1; i <= Math.ceil(aWords.length/10); i++) {
+                     html+='<small class="button" style="color: black" onclick="paginateAWords(\''+i+'\')">'+i+' </small>'
+                 }
+                 html += '</tr><tr><td class="inputCell"><input id="aWord" type="text" placeholder="Word"/></td>'
+                 html+='<td class="inputCell"><input id="aWordProb" type="text" placeholder="Likelihood (between 1 and -1)"/></td><td colspan="2">'
+                 html+='<div class="button submit" onclick="addAWord()">+</div></td></tr></table>'
+                 document.getElementById('articleWords').innerHTML = html
+             }
+         }
+         async function getOutput() {
+             let response = await makeRequest({'function': 'getOutput'})
+             if ('error' in JSON.parse(response)) {
+                 document.getElementById('output').innerHTML = 'There was an error with the request'
+             }
+             else {
+                 let resp = JSON.parse(JSON.parse(response)["response"]["result"]);
+                 setCSVContent(resp);
+                 let html = 'Last run: '+ dateString(resp["last_run"])
+                 html+='<h3>Status</h3>' + statusString(resp["json"]["status"])
+                 html+='<h3>Events By Researcher (Click a name for events)</h3>'
+                 for (let person in resp["json"]["found_epe"]) {
+                     html+='<h4 style="cursor: pointer;"'
+                     html+= 'onclick="document.getElementById(\''+person
+                     html+='\').style.display = (document.getElementById(\''+person
+                     html+= '\').style.display === \'block\' ? \'none\' : \'block\')">'+person
+                     html+= '</h4><list id="'+person+'" style="display: none">'
+                     for (let i in resp["json"]["found_epe"][person]) {
+                         let event = resp["json"]["found_epe"][person][i]
+                         html+='<li>Link: [<a href="' + event["link"] +'">'
+                         html+= event["type"].toUpperCase() + '</a>] <i>(Date: ' + event["details"]["date"]
+                         html+= '; Location: ' + locationString(event["details"]["location"])
+                         html+= '; Audience: ' + event["details"]["audience"] + ')</i></li>'
+                     }
+                     html+='</list>'
+                 }
+                 html+='<h3>Unknown Events ('+resp["json"]["unknown_epe"].length+' items)</h3><list>'
+                 resp["json"]["unknown_epe"].forEach(event => {
+                     html+='<li>Link: [<a href="' + event["link"] +'">'
+                     html+= event["type"].toUpperCase() + '</a>] <i>(Date: ' + event["details"]["date"]
+                     html+= '; Location: ' + locationString(event["details"]["location"])
+                     html+= '; Audience: ' + event["details"]["audience"] + ')</i></li>'
+                 });
+                 html+='</list><h3>Duplicate Events</h3><list>'
+                 resp["json"]["duplicates"].forEach(eventpair => {
+                     html+='<li>Links: <a href="' + eventpair[0] +'">'+eventpair[0]+'</a>, '
+                     html+= '<a href="' + eventpair[1] +'">'+eventpair[1]+'</a></li>'
+                 });
+                 html+='</list>'
+                 document.getElementById('output').innerHTML = html;
+             }
+         }
+         function makeRequest(request) {
+             document.getElementById('blackout').style.display = 'block';
+             return new Promise(function (resolve, reject) {
+                 var xhr = new XMLHttpRequest();
+                 xhr.open("POST", "https://script.googleapis.com/v1/scripts/AKfycbwYCgI3C-GzVsWJzpEoeyFEWm4B_yfVVNJ8Q25k0N6iOADEUHQ2s_KjFibCgKUFQShUmg:run", true);
+                 xhr.setRequestHeader('Content-Type', 'application/json');
+                 let token = getToken()
+                 xhr.setRequestHeader('Authorization', token['token_type']+' '+token["access_token"])
+                 xhr.onload = function () {
+                     resolve(xhr.response);
+                     document.getElementById('blackout').style.display = 'none';
+                 };
+                 xhr.onerror = function () {
+                     resolve(xhr.response);
+                     document.getElementById('blackout').style.display = 'none';
+                 }
+                 xhr.send(JSON.stringify(request));
+             });
+         }
+         function locationString(location) {
+             if (location === 'unknown' || location === 'online') {
+                 return location
+             }
+             let s = ''
+             for (x in location) {
+                 s += location[x] + ', '
+             }
+             if (s === '') {
+                 return 'unknown'
+             }
+             return s.slice(0, -2);
+         }
+         function dateString(date) {
+             return date.slice(8, 10)+'/'+date.slice(5, 7)+'/'+date.slice(0, 4);
+         }
+         function statusString(status) {
+             let s = ''
+             for (x in status) {
+                 s+= x.toUpperCase() +': '+ (status[x] ? 'Working' : 'Failed')+'<br>'
+             }
+             return s;
+         }
+         function setCSVContent(resp) {
+            let rows = [["PERSON", "TYPE", "LINK", "DATE", "AUDIENCE", "LOCATION"]];
+            Object.entries(resp["json"]["found_epe"]).forEach(person =>
+                    person[1].forEach(
+                            e => rows.push([person[0], e["type"], e["link"], e["details"]["date"], e["details"]["audience"], locationString(e["details"]["location"]).replace(",", ";")])
+                    )
+            )
+            resp["json"]["unknown_epe"].forEach(e =>
+               rows.push(["unknown", e["type"], e["link"]])
+            )
+            csvContent = "data:text/csv;charset=utf-8," + rows.map(r => r.join(",")).join("\n");
+         }
+         function downloadCSV() {
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "epe_tracker_tool.csv");
+            document.body.appendChild(link);
+            link.click();
+         }
+         // Google Quickstart Code
+         var CLIENT_ID = '151872168996-fmj1okr5q70e7mckrp8qfn34ts6efavm.apps.googleusercontent.com';
+         var API_KEY = 'AIzaSyCe2ZanzrTX8I1VxcjQ82JoyOqRr88adOY';
+         var DISCOVERY_DOCS = ["https://script.googleapis.com/$discovery/rest?version=v1"];
+         var SCOPES = 'https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/drive';
+         function handleClientLoad() {
+            gapi.load('client:auth2', initClient);
+         }
+         function initClient() {
+            gapi.client.init({
+               apiKey: API_KEY,
+               clientId: CLIENT_ID,
+               discoveryDocs: DISCOVERY_DOCS,
+               scope: SCOPES
+            }).then(function () {
+               gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+               updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+               document.getElementById("signIn").onclick = handleAuthClick;
+            }, function(error) {
+               alert("There was an error initiating the client");
+               console.log(JSON.stringify(error, null, 2));
+            });
+         }
+         var prevStatus = false
+         function updateSigninStatus(isSignedIn) {
+            if (isSignedIn) {
+               document.getElementById("signIn").style.display = 'none';
+               if (!prevStatus) {setup()}
+            } else {
+               document.getElementById("signIn").style.display = 'block';
+            }
+            prevStatus = isSignedIn
+         }
+         function handleAuthClick(event) {
+            gapi.auth2.getAuthInstance().signIn();
+         }
+         function getToken() {
+            return gapi.client.getToken()
+         }
+      </script>
+   </body>
+   <style>
+      body {
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0
+      }
+      header {
+      background-color: midnightblue;
+      color: white;
+      text-align: center;
+      padding: 1%
+      }
+      #blackout {
+      background-color: rgba(100, 100, 100, 0.4);
+      text-align: center;
+      font-size: 5em;
+      display:none;
+      width:100%;
+      height:100%;
+      position: fixed;
+      left:0;
+      top:0;
+      z-index:10;
+      color: white;
+      padding-top: 20%
+      }
+      #signIn {
+      background-color: white;
+      text-align: center;
+      display:none;
+      width:100%;
+      height:100%;
+      position: fixed;
+      left:0;
+      top:0;
+      z-index:10;
+      color: white;
+      }
+      .block {
+      width: 80%;
+      margin: 0 auto;
+      }
+      table {
+      border-collapse: collapse;
+      border: 1px solid black;
+      table-layout: fixed;
+      width: 100%;
+      }
+      th {
+      background-color: black;
+      color: white;
+      padding: 1%
+      }
+      td {
+      word-wrap: break-word;
+      }
+      .block td {
+      padding: 1%;
+      border-left: 1px solid black;
+      border-bottom: 1px solid black;
+      }
+      .inputCell {
+      text-align: center;
+      }
+      input {
+      border: 1px solid black;
+      padding: 2%;
+      width: 90%
+      }
+      h2 {
+      text-align: center;
+      }
+      .button {
+      margin: auto;
+      color: white;
+      padding: 1%;
+      height: 100%;
+      text-align: center;
+      cursor: pointer;
+      width: 10%;
+      }
+      .submit {
+      background-color: forestgreen;
+      border: 2px solid darkgreen;
+      }
+      .withText {
+      width: 90%;
+      }
+      .remove {
+      background-color: crimson;
+      border: 2px solid darkred;
+      }
+      #footer {
+      background-color: #101050;
+      text-align: center;
+      width:100%;
+      height:10%;
+      position: fixed;
+      left:0;
+      bottom:0;
+      z-index:9;
+      color: white;
+      padding-top: 1%;
+      }
+      #footer table {
+      width: 90%;
+      margin: 5px auto auto;
+      }
+      #footer td {
+      border: 2px solid white;
+      }
+      #footer a {
+      text-decoration: none;
+      color: white;
+      }
+   </style>
+</html>

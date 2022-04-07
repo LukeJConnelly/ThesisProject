@@ -56,5 +56,5 @@ for person in people:
             sleep(randint(30, 40))
 
 print(str(num_found_google) + " google results found")
-with open("found/found_google.json", 'w') as output_file:
+with open("found/found_google.json", 'w+') as output_file:
     json.dump(found_google, output_file)

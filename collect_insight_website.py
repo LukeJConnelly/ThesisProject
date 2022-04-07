@@ -46,5 +46,5 @@ for f in files:
     })
     
 print(str(len(collected_articles)) + " insight website articles found")
-with open("found/found_insight_website.json", 'w') as output_file:
+with open("found/found_insight_website.json", 'w+') as output_file:
     json.dump(collected_articles, output_file)

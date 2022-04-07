@@ -56,7 +56,7 @@ for user in users:
         print("Issue for " + user)
 
 print(str(num_tweets_found) + " tweets found")
-with open("found/found_tweets.json", 'w') as output_file:
+with open("found/found_tweets.json", 'w+') as output_file:
     json.dump(collected_tweets, output_file)
 
 # IMPORTANT INFO ON RATE LIMIT:

@@ -173,7 +173,7 @@ optimal_probabilities = max(accuracies, key=accuracies.get)
 
 print("Best run " + str(accuracies[optimal_probabilities]) + " " + str(optimal_probabilities))
 
-output_file = open("insight_website_suggested_weights.json", 'w')
+output_file = open("insight_website_suggested_weights.json", 'w+')
 json.dump({"initial": optimal_probabilities[0],
            "threshold": optimal_probabilities[1],
            "words": word_final},

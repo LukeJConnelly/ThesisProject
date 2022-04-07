@@ -54,5 +54,5 @@ for f in files:
         "datetime": str(article.publish_date)})
     
 print(str(len(collected_articles)) + " brainstorm articles found")
-with open("found/found_brainstorm.json", 'w') as output_file:
+with open("found/found_brainstorm.json", 'w+') as output_file:
     json.dump(collected_articles, output_file)

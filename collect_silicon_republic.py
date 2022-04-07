@@ -52,8 +52,8 @@ for k in delete_list: del previous_articles[k]
 
 print(str(len(collected_articles)) + " silicon republic articles found")
 
-with open("found/memory_silicon_republic.json", 'w') as memory_file:
+with open("found/memory_silicon_republic.json", 'w+') as memory_file:
     json.dump(previous_articles, memory_file)
 
-with open("found/found_silicon_republic.json", 'w') as output_file:
+with open("found/found_silicon_republic.json", 'w+') as output_file:
     json.dump(collected_articles, output_file)
