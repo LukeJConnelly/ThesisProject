@@ -2,6 +2,9 @@ import tweepy
 import json
 import datetime
 from classes.tweet import Tweet
+import os
+if not os.path.exists('found'):
+    os.makedirs('found')
 
 env_file = open("env.json", 'r')
 env_vars = json.load(env_file)

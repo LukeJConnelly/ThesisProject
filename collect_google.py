@@ -9,6 +9,9 @@ import requests
 import re
 import textract
 import urllib3
+import os
+if not os.path.exists('found'):
+    os.makedirs('found')
 requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'ALL:@SECLEVEL=1'
 
 

@@ -1,3 +1,10 @@
+# OPTIONAL ARGUMENTS (Provide none or all 5)
+# 1. ngram - Number of ngrams to generate for words when analysing texts
+# 2. bound - Sets maximum and minimum likelihoods a hashtag/user can have (ie. weights will be in range [bound, -bound])
+# 3. word_bound - Sets maximum and minimum likelihoods a word can have
+# 4. min_prob - Sets the minimum likelihood a hashtag/user should have to be included (ie. weights in range min_prob > X > -min_prob will be excluded)
+# 5. min_word_prob - Sets the minimum likelihood a word should have to be included
+
 import json
 import re
 import math
@@ -88,8 +95,8 @@ random.seed(42)
 ngram = int(sys.argv[-5]) if sys.argv[:-1] else 3
 bound = float(sys.argv[-4]) if sys.argv[:-1] else 0.95
 word_bound = float(sys.argv[-3]) if sys.argv[:-1] else 0.99
-min_prob = float(sys.argv[-2]) if sys.argv[:-1] else 0.05
-min_word_prob = float(sys.argv[-1]) if sys.argv[:-1] else 0.05
+min_prob = float(sys.argv[-2]) if sys.argv[:-1] else 0
+min_word_prob = float(sys.argv[-1]) if sys.argv[:-1] else 0
 
 training_data = json.load(open("twitter_training_data.json", 'r'))
 is_epe = training_data["is_epe"]
@@ -116,8 +123,8 @@ for user in found_tweets:
 
 word_final = get_feature_weights(word_training_data, word_bound, min_word_prob, ngram=ngram)
 # No need for ngrams as all hashtags and usernames are one word only
-hashtag_final = get_feature_weights(hashtag_training_data, min_prob, bound)
-user_mention_final = get_feature_weights(user_mention_training_data, min_prob, bound)
+hashtag_final = get_feature_weights(hashtag_training_data, bound, min_prob)
+user_mention_final = get_feature_weights(user_mention_training_data, bound, min_prob)
 
 # ADAPTED FROM ANALYSIS.PY
 # Collect features across all tweets

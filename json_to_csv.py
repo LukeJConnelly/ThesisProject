@@ -1,5 +1,8 @@
 import json
 import csv
+import os
+if not os.path.exists('csv_outputs'):
+    os.makedirs('csv_outputss')
 
 output = json.load(open('output.json'))
 

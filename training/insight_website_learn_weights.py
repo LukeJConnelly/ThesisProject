@@ -1,3 +1,8 @@
+# OPTIONAL ARGUMENTS (Provide none or all 3)
+# 1. ngram - Number of ngrams to generate for words when analysing texts
+# 2. bound - Sets maximum and minimum likelihoods a word can have (ie. weights will be in range [bound, -bound])
+# 3. min_prob - Sets the minimum likelihood a word should have to be included (ie. weights in range min_prob > X > -min_prob will be excluded)
+
 import json
 import re
 import math
@@ -87,7 +92,7 @@ random.seed(42)
 
 ngram = int(sys.argv[-3]) if sys.argv[:-1] else 3
 bound = float(sys.argv[-2]) if sys.argv[:-1] else 0.8
-min_prob = float(sys.argv[-1]) if sys.argv[:-1] else 0.05
+min_prob = float(sys.argv[-1]) if sys.argv[:-1] else 0
 
 training_data = json.load(open("insight_website_training_data.json", 'r'))
 is_epe = training_data["is_epe"]

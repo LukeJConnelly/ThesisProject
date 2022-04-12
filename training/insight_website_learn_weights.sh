@@ -6,6 +6,6 @@ do
 		for mp in 0 0.01 0.02 0.03 0.04 0.05 0.1 0.2
 		do
 			echo -e "$ngram $bd $mp : $(python3 insight_website_learn_weights.py $ngram $bd $mp)"
-    done
-  done
+		done
+	done
 done

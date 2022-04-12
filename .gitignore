@@ -23,6 +23,7 @@ __pycache__/
 
 # Distribution / packaging
 bin/
+test/
 build/
 develop-eggs/
 dist/
