@@ -1,0 +1,23 @@
+{
+  "initial": 0.65,
+  "threshold": 0.7,
+  "words": {
+    "talk": 0.1,
+    "speech": 0.1,
+    "podcast": 0.2,
+    "workshop": 0.2,
+    "hackathon": 0.2,
+    "masterclass": 0.2,
+    "steam": 0.1,
+    "epe": 0.9,
+    "vacancy": -0.5,
+    "job opportunity": -0.9,
+    "job opportunities": -0.9,
+    "join us": -0.2,
+    "award": -0.4,
+    "fellowship": -0.6,
+    "apply now": -0.4,
+    "phd": -0.1,
+    "position": -0.1
+  }
+}

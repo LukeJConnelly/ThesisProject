@@ -5,7 +5,10 @@ import datetime
 import glob
 import json
 import re
-    
+import os
+if not os.path.exists('found'):
+    os.makedirs('found')
+
 env_file = open("env.json", 'r')
 env_vars = json.load(env_file)
 

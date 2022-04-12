@@ -2,6 +2,9 @@ import json
 import datetime
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+import os
+if not os.path.exists('found'):
+    os.makedirs('found')
 
 env_file = open("env.json", 'r')
 env_vars = json.load(env_file)

@@ -1,3 +1,7 @@
+# This is not intended for use but instead for comparison of conditional probability classifier system
+# with the model created through training.
+
+
 import json
 import re
 import math
