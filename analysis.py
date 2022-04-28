@@ -188,7 +188,6 @@ try:
             stems = [ps.stem(w) for w in word_tokens]
             for term in tweets_probability_words_dict:
                 if all(x.lower() in stems for x in term.split(' ')):
-                    features.append(("Uses: " + term, tweets_probability_words_dict[term.lower()]))
                     if tweets_probability_words_dict[term.lower()] > 0:
                         probability = get_probability(probability, tweets_probability_words_dict[term.lower()])
                     else:
