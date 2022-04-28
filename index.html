@@ -196,12 +196,12 @@
          let aWords = [];
          let csvContent = "";
          async function removePerson(person) {
-             let response = await makeRequest({'function': 'removePerson', "parameters": [person]})
+             let response = await makeRequest({'function': 'removePerson', "parameters": [unescape(person)]})
              if ('error' in JSON.parse(response)) {
                  alert('There was an error with the request')
              }
              else {
-                 alert('Successfully removed '+person)
+                 alert('Successfully removed '+unescape(person))
                  getPeople()
              }
          }
@@ -237,7 +237,7 @@
                      html+= (resp[person]["twitter"] === undefined ? '<i>No Twitter Provided<\i>' : resp[person]["twitter"]);
                      html+='</td><td>';
                      html+='<div class="button remove" '
-                     html+='onclick="removePerson(\''+person+'\')">X</div></td></tr>'
+                     html+='onclick="removePerson(\''+escape(person)+'\')">X</div></td></tr>'
                  }
                  html += '<tr><td class="inputCell"><input id="personName" placeholder="Name"/></td>'
                  html += '<td class="inputCell"><input id="personTwitter" type="text" placeholder="Twitter (exclude @)"/></td>'
@@ -246,12 +246,12 @@
              }
          }
          async function removePage(page) {
-             let response = await makeRequest({'function': 'removePage', "parameters": [page]})
+             let response = await makeRequest({'function': 'removePage', "parameters": [unescape(page)]})
              if ('error' in JSON.parse(response)) {
                  alert('There was an error with the request')
              }
              else {
-                 alert('Successfully removed '+page)
+                 alert('Successfully removed '+unescape(page))
                  getPages()
              }
          }
@@ -284,7 +284,7 @@
                      html+= resp[page]["twitter"];
                      html+='</td><td>';
                      html+='<div class="button remove" ';
-                     html+='onclick="removePage(\''+page+'\')">X</div></td></tr>'
+                     html+='onclick="removePage(\''+escape(page)+'\')">X</div></td></tr>'
                  }
                  html += '<tr><td class="inputCell"><input id="pageName" type="text" placeholder="Name"/></td>'
                  html+='<td class="inputCell"><input id="pageTwitter" type="text" placeholder="Twitter (exclude @)"/></td>'
@@ -1002,10 +1002,10 @@
                  html+='<h3>Events By Researcher (Click a name for events)</h3>'
                  for (let person in resp["json"]["found_epe"]) {
                      html+='<h4 style="cursor: pointer;"'
-                     html+= 'onclick="document.getElementById(\''+person
-                     html+='\').style.display = (document.getElementById(\''+person
+                     html+= 'onclick="document.getElementById(\''+escape(person)
+                     html+='\').style.display = (document.getElementById(\''+escape(person)
                      html+= '\').style.display === \'block\' ? \'none\' : \'block\')">'+person
-                     html+= '</h4><list id="'+person+'" style="display: none">'
+                     html+= '</h4><list id="'+escape(person)+'" style="display: none">'
                      for (let i in resp["json"]["found_epe"][person]) {
                          let event = resp["json"]["found_epe"][person][i]
                          html+='<li>Link: [<a href="' + event["link"] +'">'

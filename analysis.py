@@ -168,11 +168,8 @@ try:
         tweet_list = found_tweets[user]
         for tweet in tweet_list:
             probability = tweets_probability_weights["initial"]
-            features = []
             for user_mention in tweet["entities"]["user_mentions"]:
                 if user_mention["screen_name"].lower() in tweets_probability_users_dict:
-                    features.append(("Mentions: " + user_mention["screen_name"].lower(),
-                                     tweets_probability_users_dict[user_mention["screen_name"].lower()]))
                     if tweets_probability_users_dict[user_mention["screen_name"].lower()] > 0:
                         probability = get_probability(probability, tweets_probability_users_dict[
                             user_mention["screen_name"].lower()])
@@ -181,8 +178,6 @@ try:
                             tweets_probability_users_dict[user_mention["screen_name"].lower()]))
             for hashtag in tweet["entities"]["hashtags"]:
                 if hashtag["text"].lower() in tweets_probability_hashtags_dict:
-                    features.append(("Hashtag: " + hashtag["text"].lower(),
-                                     tweets_probability_hashtags_dict[hashtag["text"].lower()]))
                     if tweets_probability_hashtags_dict[hashtag["text"].lower()] > 0:
                         probability = get_probability(probability,
                                                       tweets_probability_hashtags_dict[hashtag["text"].lower()])
@@ -290,15 +285,15 @@ try:
     # Articles found by collect_podcast.py
     found_podcast = json.load(open('found/found_podcast.json'))
     for episode in found_podcast:
-        probability = 0
+        #probability = 0
         people_involved = []
         for person in people:
             if person.lower() in (episode["name"] + episode["description"]).lower():
-                probability = 1
+                #probability = 1
                 people_involved.append(person)
         # Output
         outputfn(people_involved, "podcast", episode["name"], episode["link"],
-                 probability > 0, output, episode["name"] + ": " + episode["description"],
+                 True, output, episode["name"] + ": " + episode["description"],
                  details={"date": episode["datetime"], "location": "online", "audience": audience_estimate["podcast"]})
 except Exception:
     print("Podcast currently down with trace: ", traceback.format_exc())
