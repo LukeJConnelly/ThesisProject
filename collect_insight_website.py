@@ -44,7 +44,7 @@ for f in files:
     collected_articles.append({
         "title": article.title,
         "text": article.text,
-        "link": f[2:-10],
+        "link": "https://"+f[2:-10],
         "datetime": str(article.publish_date)
     })
     
